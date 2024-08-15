@@ -2,8 +2,6 @@
 //This class will contain the logic for generating the MD5 hash of the user input
 
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.FileWriter;
