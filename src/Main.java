@@ -27,6 +27,25 @@ import java.util.Scanner;
 // our helper class will be called CryptoHelper
 //this class will contain the logic for generating the MD5 hash of the user input
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+
+
 public class Main {
 
+    public static void main(String[] args) {
+        //new instances of our classes / run the program
+
+        try {
+            CryptoHelper cryptoHelper = new CryptoHelper();
+            cryptoHelper.processFile("data.txt");
+        } catch (Exception e) {
+            System.out.println("Error  " + e.getMessage());
+        }
+    }
 }
