@@ -8,79 +8,86 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.Scanner;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 
 class CryptoHelper {
 
-    //setting variables for the algorithm and key
+    //This class will contain the logic for generating the MD5 hash of the user input
     private static final String ALGORITHM = "AES";
-    //key for the encryption
-    private static final byte[] KEY = "PROFESSORZayass!".getBytes();
+    private static final byte[] KEY = "ProfessorZaya!z!".getBytes(); // 16-byte key for AES-128
 
 
-    //processFile method - bring in the file name
+    //process file method
+    //bring in the file name
     public void processFile(String fileName) {
+
+        //create a new file object and set it to the file name
         File file = new File(fileName);
         String fileContent = "";
 
-        //If the file exists, read the file
+
+        //if the file exists then read file
         if (file.exists()) {
+
+            //try to read the file and if there is a next line then read the file
             try (Scanner fileScanner = new Scanner(file)) {
-                //if the file has a next line, read the file
-                //we are setting the file content and showing the encrypted file data
                 if (fileScanner.hasNextLine()) {
                     fileContent = fileScanner.nextLine();
-                    System.out.println("Encrypted File Data " + fileContent);
-
-                    //decrypt the file content and show the decrypted content
+                    System.out.println("Encrypted File Data: " + fileContent);
                     String decryptedContent = decrypt(fileContent);
-                    System.out.println("Decrypted content: " + decryptedContent);
+                    System.out.println("Decrypted Data: " + decryptedContent);
                 }
             } catch (IOException e) {
-                System.out.println("Cannot read file / error: " + e.getMessage());
+                System.out.println("Read file / error: " + e.getMessage());
             }
         }
 
-        //get new input / 'data' from the user
+
+
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter a string to encrypt: ");
         String input = scanner.nextLine();
         scanner.close();
 
-        //Encrypt the input
+        //generate the MD5 hash of the input per requirements
+        String md5Hash = generateMD5Hash(input);
+        System.out.println("MD5 Hash: " + md5Hash);
+
         String encryptedContent = encrypt(input);
-        //call encrypt method and show the encrypted content / new MD5 hash
         System.out.println("Encrypted content: " + encryptedContent);
 
-
-
-        //new we need to update the file with the new encrypted content
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(encryptedContent);
-
+            writer.write("\n");
+            writer.write(md5Hash);
         } catch (IOException e) {
-            System.out.println("File Write Error" + e.getMessage());
+            System.out.println("File Write Error: " + e.getMessage());
         }
     }
 
-    //Encrypt method - bring in the input
-    private String encrypt(String input) {
-        try {
-            //set the key spec and cipher
-            //side note: key spec is the key for the encryption
-            SecretKeySpec keySpec = new SecretKeySpec(KEY, ALGORITHM);
 
-            //cipher is the encryption
-            //Cipher is apart of the javax.crypto package
+
+    //encrypt method
+    //bring in the input
+    private String encrypt(String input) {
+
+        //try to encrypt the input
+        try {
+
+            //new instance of the secret key spec ad cipher
+            SecretKeySpec keySpec = new SecretKeySpec(KEY, ALGORITHM);
             Cipher cipher = Cipher.getInstance(ALGORITHM);
+
+            //initialize the cipher
             cipher.init(Cipher.ENCRYPT_MODE, keySpec);
 
-            //encrypt the input and return the encrypted bytes, bytes are the smallest unit of data
+            //get the bytes of the input and encrypt the bytes
             byte[] encryptedBytes = cipher.doFinal(input.getBytes());
 
-            //then we return the encrypted bytes as a string because we are using Base64 encoding
+            //return the encrypted bytes
             return Base64.getEncoder().encodeToString(encryptedBytes);
-
-
         } catch (Exception e) {
             System.out.println("Error during encryption: " + e.getMessage());
             return null;
@@ -88,27 +95,55 @@ class CryptoHelper {
     }
 
 
-//decrypt method - bring in the encrypted content
+    //decrypt method
+    //bring in the encrypted content
     private String decrypt(String encryptedContent) {
+
+        //try to decrypt the encrypted content
         try {
-            //grabbing our secret key and setting the cipher
+            //initalize / new instance of the secret key spec and cipher
             SecretKeySpec keySpec = new SecretKeySpec(KEY, ALGORITHM);
-            //setting the cipher to decrypt
             Cipher cipher = Cipher.getInstance(ALGORITHM);
-            //initiating the cipher to decrypt
             cipher.init(Cipher.DECRYPT_MODE, keySpec);
 
-
-            //decoding the encrypted content and decrypting the bytes
+            //decode the encrypted content and decrypt the bytes
             byte[] decodedBytes = Base64.getDecoder().decode(encryptedContent);
-
-            //return the decrypted bytes as a string
             byte[] decryptedBytes = cipher.doFinal(decodedBytes);
+
+            //return the decrypted bytes
             return new String(decryptedBytes);
-
-
         } catch (Exception e) {
-            System.out.println("Error decrypting " + e.getMessage());
+            System.out.println("Error during decryption: " + e.getMessage());
+            return null;
+        }
+    }
+
+
+    //generate MD5 hash method
+    private String generateMD5Hash(String input) {
+
+        //try to generate the MD5 hash of the input
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+
+            //update the message digest with the input bytes
+            md.update(input.getBytes());
+
+            //digest the message
+            byte[] digest = md.digest();
+
+            //create a new string builder
+            StringBuilder sb = new StringBuilder();
+
+            //for each byte in the digest append the string
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+
+            //then return the string
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println("Error: " + e.getMessage());
             return null;
         }
     }
