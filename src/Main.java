@@ -24,6 +24,8 @@
 
 public class Main {
     public static void main(String[] args) {
+
+        //try and run the code I.E if the file is not found then catch the error
         try {
             CryptoHelper cryptoHelper = new CryptoHelper();
             cryptoHelper.processFile("data.txt");

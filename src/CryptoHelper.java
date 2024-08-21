@@ -55,9 +55,11 @@ class CryptoHelper {
         String md5Hash = generateMD5Hash(input);
         System.out.println("MD5 Hash: " + md5Hash);
 
+        //encrypt the input
         String encryptedContent = encrypt(input);
         System.out.println("Encrypted content: " + encryptedContent);
 
+        //try to write the file
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(encryptedContent);
             writer.write("\n");
@@ -142,6 +144,8 @@ class CryptoHelper {
 
             //then return the string
             return sb.toString();
+
+            //catch the error if there is one
         } catch (NoSuchAlgorithmException e) {
             System.out.println("Error: " + e.getMessage());
             return null;
